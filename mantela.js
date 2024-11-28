@@ -82,6 +82,9 @@ main(first)
 
     // Vis.jsを使用してネットワークを描画
     const network = new vis.Network(container, data, options);
+    // 選択されたノードとエッジの色を管理
+    let highlightedNodes = [];
+    let highlightedEdges = [];
 
     // ノードクリック時のイベントリスナーを追加
     network.on('click', function (params) {
@@ -93,6 +96,7 @@ main(first)
 
             // スタートノード（providers）を選択
             if (nodeData.type === 'provider') {
+                resetHighlight();
                 // 既存のスタートノードを上書き可能に
                 startNodeId = nodeId;
                 //alert(`スタートノードを設定しました: ${nodeData.label}`);
@@ -124,10 +128,18 @@ main(first)
                             `).join('')}
                         </ul>
                     `;
+                    highlightPath(path); // 経路をハイライト
                 } else {
                     infoContainer.innerHTML = `<p>スタートノードからターゲットノードへの経路が見つかりませんでした。</p>`;
                 }
             }
+        } else {
+            // ノード以外がクリックされた場合
+            resetColor(); // 色をリセット
+            const infoContainer = document.getElementById('node-info');
+            infoContainer.innerHTML = `<p>初期状態に戻りました。</p>`;
+            startNodeId = null;
+            targetNodeId = null;
         }
     });
 
@@ -179,6 +191,90 @@ main(first)
         }
 
         return null; // 経路が見つからなかった場合
+    }
+    /**
+     * 経路をハイライトする関数
+     * @param {Array} path - 経路情報（ノードとエッジの順序付きリスト）
+     */
+    function highlightPath(path) {
+        resetHighlight();
+        const nodeIds = path.map(step => step.node.id);
+        const edgeIds = path.filter(step => step.edge).map(step => step.edge.id);
+
+        // ノードをハイライト
+        nodeIds.forEach(nodeId => {
+            const node = network.body.data.nodes.get(nodeId);
+            if (node) {
+                network.body.data.nodes.update({
+                    id: nodeId,
+                    color: { background: 'red', border: 'darkred' } // ハイライトカラー
+                });
+            }
+        });
+
+        // エッジをハイライト
+        edgeIds.forEach(edgeId => {
+            const edge = network.body.data.edges.get(edgeId);
+            if (edge) {
+                network.body.data.edges.update({
+                    id: edgeId,
+                    color: { color: 'blue', highlight: 'darkblue' } // ハイライトカラー
+                });
+            }
+        });
+    }
+
+    /**
+     * ハイライトをリセットする関数
+     */
+    function resetHighlight() {
+        // すべてのノードの色をデフォルトに戻す
+        const allNodes = network.body.data.nodes.get();
+        allNodes.forEach(node => {
+            network.body.data.nodes.update({
+                id: node.id,
+                color: { background: 'lightgray', border: 'gray' } // デフォルトカラー
+            });
+        });
+
+        // すべてのエッジの色をデフォルトに戻す
+        const allEdges = network.body.data.edges.get();
+        allEdges.forEach(edge => {
+            network.body.data.edges.update({
+                id: edge.id,
+                color: { color: 'lightgray', highlight: 'gray' } // デフォルトカラー
+            });
+        });
+    }
+
+    /**
+     * 初期状態の色に戻す関数
+     */
+    function resetColor() {
+        // 全ノードの色を初期状態に戻す
+        const allNodes = network.body.data.nodes.get();
+        allNodes.forEach(node => {
+            if (node.type === 'extension') {
+                network.body.data.nodes.update({
+                    id: node.id,
+                    color: { background: 'orange', border: 'darkorange' } // 初期の拡張ノードの色
+                });
+            } else if (node.type === 'provider') {
+                network.body.data.nodes.update({
+                    id: node.id,
+                    color: { background: '#97C2FC', border: '#2B7CE9' } // 初期のプロバイダノードの色
+                });
+            }
+        });
+
+        // 全エッジの色を初期状態（ライトグレー）に戻す
+        const allEdges = network.body.data.edges.get();
+        allEdges.forEach(edge => {
+            network.body.data.edges.update({
+                id: edge.id,
+                color: { background: '#97C2FC', border: '#2B7CE9' } // 初期のエッジの色
+            });
+        });
     }
 }
 
