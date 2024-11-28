@@ -117,16 +117,25 @@ main(first)
                 if (path) {
                     infoContainer.innerHTML = `
                         <h3>経路情報</h3>
-                        <p><strong>スタートノード:</strong> ${nodes.find(n => n.id === startNodeId).label}</p>
-                        <p><strong>ターゲットノード:</strong> ${nodes.find(n => n.id === targetNodeId).label}</p>
-                        <ul>
-                            ${path.map(step => `
-                                <li>
-                                    <strong>ノード:</strong> ${step.node.label} <br>
-                                    ${step.edge ? `<strong>矢印ラベル:</strong> ${step.edge.label}` : ''}
-                                </li>
-                            `).join('')}
-                        </ul>
+                        <p>
+                            <strong>経路:</strong>
+                            ${path.map((step, index) => {
+                                if (step.edge) {
+                                    return `
+                                        ${index === 0 ? '' : ' → '}
+                                        <span>${step.node.label}</span>
+                                        <span style="font-size: smaller; color: gray;">(${step.edge.label})</span>
+                                    `;
+                                } else {
+                                    return `${index === 0 ? '' : ' → '}<span>${step.node.label}</span>`;
+                                }
+                            }).join('')} → 
+                            <span>${nodes.find(n => n.id === targetNodeId).label}</span>
+                        </p>
+                        <p>
+                            <strong>番号:</strong>
+                            ${path.filter(step => step.edge).map(step => step.edge.label).join('')}
+                        </p>
                     `;
                     highlightPath(path); // 経路をハイライト
                 } else {
