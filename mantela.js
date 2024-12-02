@@ -104,7 +104,7 @@ main(first)
                 // 選択したノードがスタートノードとして再設定された場合、ターゲットノードはリセット
                 targetNodeId = null;
                 const infoContainer = document.getElementById('node-info');
-                infoContainer.innerHTML = `<p>スタートノードが再設定されました。ターゲットノードを選択してください。</p>`;
+                infoContainer.innerHTML = `スタートノードが再設定されました。ターゲットノードを選択してください。`;
             }
             // ターゲットノード（extensions）を選択
             else if (nodeData.type === 'extension' && startNodeId) {
@@ -116,37 +116,34 @@ main(first)
                 const infoContainer = document.getElementById('node-info');
                 if (path) {
                     infoContainer.innerHTML = `
-                        <h3>経路情報</h3>
-                        <p>
-                            <strong>経路:</strong>
-                            ${path.map((step, index) => {
-                                if (step.edge) {
-                                    return `
-                                        ${index === 0 ? '' : ' → '}
-                                        <span>${step.node.label}</span>
-                                        <span style="font-size: smaller; color: gray;">(${step.edge.label})</span>
-                                    `;
-                                } else {
-                                    return `${index === 0 ? '' : ' → '}<span>${step.node.label}</span>`;
-                                }
-                            }).join('')} → 
-                            <span>${nodes.find(n => n.id === targetNodeId).label}</span>
-                        </p>
-                        <p>
+                        <strong>経路:</strong>
+                        ${path.map((step, index) => {
+                            if (step.edge) {
+                                return `
+                                    ${index === 0 ? '' : ' → '}
+                                    <span>${step.node.label}</span>
+                                    <span style="font-size: smaller; color: gray;">(${step.edge.label})</span>
+                                `;
+                            } else {
+                                return `${index === 0 ? '' : ' → '}<span>${step.node.label}</span>`;
+                            }
+                        }).join('')} →
+                        <span>${nodes.find(n => n.id === targetNodeId).label}</span>
+                        <!--<p>
                             <strong>番号:</strong>
                             ${path.filter(step => step.edge).map(step => step.edge.label).join('')}
-                        </p>
+                        </p>-->
                     `;
                     highlightPath(path); // 経路をハイライト
                 } else {
-                    infoContainer.innerHTML = `<p>スタートノードからターゲットノードへの経路が見つかりませんでした。</p>`;
+                    infoContainer.innerHTML = `スタートノードからターゲットノードへの経路が見つかりませんでした。`;
                 }
             }
         } else {
             // ノード以外がクリックされた場合
             resetColor(); // 色をリセット
             const infoContainer = document.getElementById('node-info');
-            infoContainer.innerHTML = `<p>初期状態に戻りました。</p>`;
+            infoContainer.innerHTML = `初期状態に戻りました。`;
             startNodeId = null;
             targetNodeId = null;
         }
